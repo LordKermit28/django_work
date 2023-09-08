@@ -1,0 +1,48 @@
+{% extends 'mailing/base.html' %}
+{% load static %}
+
+{% block content %}
+<main class="px-3">
+    <h1>Сервис для рассылок
+        E>mail</h1>
+</main>
+
+{% if user.group.staff %}
+<p class="lead">
+    <a href="{% url 'list_mailing' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К рассылкам</a>
+</p>
+<p class="lead">
+<p class="lead">
+    <a href="{% url 'list_user' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К пользователям</a>
+</p>
+<p class="lead">
+
+{% elif %}
+{% if user.is_authenticated %}
+<p class="lead">
+    <a href="{% url 'list_mailing' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К рассылкам</a>
+</p>
+<p class="lead">
+    <a href="{% url 'list_message' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К письмам</a>
+</p>
+<p class="lead">
+    <a href="{% url 'list_client' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К клиентам</a>
+</p>
+<p class="lead">
+    <a href="{% url 'clients:profile' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Профиль</a>
+</p>
+{% else %}
+<p class="lead">Войдите в аккаунт или зарегистрируйтесь</p>
+<p class="lead">
+    <a href="{% url 'clients:login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Войти</a>
+</p>
+<a href="{% url 'clients:register' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Зарегистрироваться</a>
+{% endif %}
+{% if user.is_authenticated %}
+<footer class="mt-auto text-white-50">
+    <p><a href="{% url 'clients:logout' %}" class="text-white">Выйти</a>.</p>
+</footer>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'mailing/base.html' %}
+{% load my_tags %}
+{% block content %}
+<div><p class="lead">
+    <a href="{% url 'create_client' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Создать нового клиента</a>
+</p>
+</div>
+{% for object in object_list %}
+
+<div class="container px-4 py-5" id="hanging-icons">
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="col d-flex align-items-start">
+                <svg class="bi" width="1em" height="1em">
+                    <use xlink:href="#toggles2"/>
+                </svg>
+            </div>
+            <div>
+                <h3 class="fs-2 text-body-emphasis">{{ object.full_name }}</h3>
+                <p>Email: - {{ object.email }}</p>
+                <p>Comment: - {{ object.comment }}</p>
+
+                <a href="{% url 'edit_client' object.pk %}" class="btn btn-warning">
+                    Редактровать
+                </a>
+                <a href="{% url 'delete_client' object.pk %}" class="btn btn-danger">
+                    Удалить
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endblock %}

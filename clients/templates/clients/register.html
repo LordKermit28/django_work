@@ -1,0 +1,28 @@
+{% extends 'mailing/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="col-12">
+  <div class="row mb-12">
+    <div class="col-6">
+      <div class="row g-0">
+        <div class="card mx-auto">
+          <div class="card-header">
+            <h4 class="card-title">
+              Регистрация
+            </h4>
+          </div>
+          <div class="card-body">
+            <form method="post">
+              {% csrf_token %}
+              {{ form.as_p }}
+              <button type="submit" class="btn btn-success">Зарегистрироваться</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

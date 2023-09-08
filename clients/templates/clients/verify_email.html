@@ -1,0 +1,8 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+
+Activate your account by clicking the link below:
+<a href="{% url 'verify_email' token=token %}">Activate your account</a>
+
+{% endblock  %}

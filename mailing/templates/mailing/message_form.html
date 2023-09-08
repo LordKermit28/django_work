@@ -1,0 +1,18 @@
+{% extends 'mailing/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<body>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% if object %}
+    <button type="submit" class="btn btn-success">Update</button>
+    {% else %}
+    <button type="submit" class="btn btn-success">Create</button>
+    {% endif %}
+</form>
+</body>
+{% endblock %}
+

@@ -1,0 +1,60 @@
+{% extends 'mailing/base.html' %}
+{% load my_tags %}
+{% block content %}
+<div>
+    <p class="lead">
+        <a href="{% url 'create_mailing' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Создать новую
+            настройку рассылки</a>
+    </p>
+</div>
+{% for object in object_list %}
+<div class="container px-4 py-5" id="hanging-icons">
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="col d-flex align-items-start">
+            <svg class="bi" width="1em" height="1em">
+                <use xlink:href="#toggles2"/>
+            </svg>
+        </div>
+
+        <div>
+            <h3 class="fs-2 text-body-emphasis">{{ object.name }}</h3>
+            <p>Send time - {{ object.send_time }}</p>
+            <p>Frequency - {{ object.frequency }}</p>
+            <p>Status - {{ object.status }}</p>
+
+            {% if not user.grop == manager %}
+                {% if object.status == 'created' %}
+                <a href="{% url 'start_mailing' object.pk %}" class="btn btn-info">
+                    Запустить
+                </a>
+                {% elif object.status == 'started' %}
+                <p>Рассылка выполняется...</p>
+                <a href="{% url 'stop_mailing' object.pk %}" class="btn btn-info">
+                    Завершить
+                </a>
+                {% elif object.status == 'completed' %}
+                <p>Рассылка завершена.</p>
+                <a href="{% url 'start_mailing' object.pk %}" class="btn btn-info">
+                    Запустить снова
+                </a>
+                <script>
+            function refreshPage() {
+                location.replace(location.href); =
+            }
+
+
+
+                </script>
+                {% endif %}
+                <a href="{% url 'edit_mailing' object.pk %}" class="btn btn-warning">
+                    Редактировать
+                </a>
+                <a href="{% url 'delete_mailing' object.pk %}" class="btn btn-danger">
+                    Удалить
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
