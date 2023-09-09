@@ -1,22 +1,23 @@
 from random import sample
-
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from django.utils import timezone
-from django.http import HttpResponse, HttpResponseRedirect
-from django.core.mail import send_mail
-from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
-from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, ListView, DetailView, DeleteView
-import time
-
 from blog.models import Blog
 from clients.models import Author
 from config import settings
 from mailing.forms import MailingForm, MessageForm, ClientForm
 from mailing.models import Mailing, Message, Client, MailingLog
-
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404, reverse
+from django.http import HttpResponseRedirect
+from django.utils import timezone
+from django.conf import settings
+import time
 
 def is_not_manager(user):
     return not user.groups.filter(name='manager').exists()
@@ -91,6 +92,7 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
 
 @method_decorator(login_required, name='dispatch')
 def start_mailing(request, pk):
+
     mailing = get_object_or_404(Mailing, pk=pk)
     if mailing.send_time > timezone.now():
         mailing.status = 'started'
