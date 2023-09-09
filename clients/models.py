@@ -8,6 +8,7 @@ class Author(AbstractUser):
     organization = models.CharField(max_length=100, null=True, blank=True)
     avatar = models.ImageField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
+    is_baned = models.BooleanField(default=False)
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 

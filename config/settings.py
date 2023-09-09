@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'mailing',
     'clients',
     'tempus_dominus',
+    'blog',
 ]
 
 MIDDLEWARE = [
@@ -105,7 +106,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 AUTH_USER_MODEL = 'clients.Author'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-LOGIN_URL = 'clients/'
+LOGIN_URL = '/'
 
 email = os.getenv('EMAIL')
 password = os.getenv('PASSWORD')

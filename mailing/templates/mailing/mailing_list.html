@@ -22,7 +22,7 @@
             <p>Frequency - {{ object.frequency }}</p>
             <p>Status - {{ object.status }}</p>
 
-            {% if not user.grop == manager %}
+            {% if user.grop == manager %}
                 {% if object.status == 'created' %}
                 <a href="{% url 'start_mailing' object.pk %}" class="btn btn-info">
                     Запустить

@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+
 <main class="px-3">
     <h1>Сервис для рассылок
         E>mail</h1>
@@ -10,7 +11,11 @@
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
+            {% if user %}
+            <button type="submit" class="btn btn-success">Обновить данные</button>
+            {% else %}
             <button type="submit" class="btn btn-success">Создать</button>
+            {% endif %}
         </form>
     </div>
 

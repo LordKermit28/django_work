@@ -2,47 +2,65 @@
 {% load static %}
 
 {% block content %}
-<main class="px-3">
-    <h1>Сервис для рассылок
-        E>mail</h1>
-</main>
+<div class="main">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Сервис для рассылок E-mail</h1>
+                {% if user.is_authenticated %}
+                <p class="lead">
+                    <a href="{% url 'list_mailing' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К
+                        рассылкам</a>
+                </p>
+                <p class="lead">
+                    <a href="{% url 'list_message' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К
+                        письмам</a>
+                </p>
+                <p class="lead">
+                    <a href="{% url 'list_client' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К
+                        клиентам</a>
+                </p>
+                <p class="lead">
+                    <a href="{% url 'clients:profile' %}"
+                       class="btn btn-lg btn-light fw-bold border-white bg-white">Профиль</a>
+                </p>
 
-{% if user.group.staff %}
-<p class="lead">
-    <a href="{% url 'list_mailing' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К рассылкам</a>
-</p>
-<p class="lead">
-<p class="lead">
-    <a href="{% url 'list_user' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К пользователям</a>
-</p>
-<p class="lead">
-
-{% elif %}
-{% if user.is_authenticated %}
-<p class="lead">
-    <a href="{% url 'list_mailing' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К рассылкам</a>
-</p>
-<p class="lead">
-    <a href="{% url 'list_message' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К письмам</a>
-</p>
-<p class="lead">
-    <a href="{% url 'list_client' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К клиентам</a>
-</p>
-<p class="lead">
-    <a href="{% url 'clients:profile' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Профиль</a>
-</p>
-{% else %}
-<p class="lead">Войдите в аккаунт или зарегистрируйтесь</p>
-<p class="lead">
-    <a href="{% url 'clients:login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Войти</a>
-</p>
-<a href="{% url 'clients:register' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Зарегистрироваться</a>
-{% endif %}
-{% if user.is_authenticated %}
-<footer class="mt-auto text-white-50">
-    <p><a href="{% url 'clients:logout' %}" class="text-white">Выйти</a>.</p>
-</footer>
+            </div>
+            <div class="col-md-6">
+                {% for blog in blogs %}
+                <div class="text-center mt-4">
+                    <h3 class="fs-2 text-body-emphasis">{{ blog.title }}</h3>
+                    <p>{{ blog.content | truncatechars:50 }}</p>
+                    <a href="#" class="icon-link">
+                        Перейти к блогу
+                        <svg class="bi">
+                            <use xlink:href="#chevron-right"/>
+                        </svg>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
-{% endif %}
-{% endif %}
+    {% else %}
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <p class="lead">Войдите в аккаунт или зарегистрируйтесь</p>
+        <p class="lead">
+          <a href="{% url 'clients:login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Войти</a>
+        </p>
+        <a href="{% url 'clients:register' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Зарегистрироваться</a>
+      </div>
+    </div>
+    {% endif %}
+    </div>
+{% if user.is_authenticated %}
+    <footer class="mt-auto text-white-50">
+      <p><a href="{% url 'clients:logout' %}" class="text-white">Выйти</a>.</p>
+    </footer>
+    </div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

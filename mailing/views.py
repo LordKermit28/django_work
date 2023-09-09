@@ -1,5 +1,7 @@
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import UserPassesTestMixin
+from random import sample
+
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.utils import timezone
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.mail import send_mail
@@ -8,18 +10,28 @@ from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, UpdateView, ListView, DetailView, DeleteView
 import time
+
+from blog.models import Blog
 from clients.models import Author
 from config import settings
 from mailing.forms import MailingForm, MessageForm, ClientForm
-from mailing.models import Mailing, Message, Client
+from mailing.models import Mailing, Message, Client, MailingLog
 
+
+def is_not_manager(user):
+    return not user.groups.filter(name='manager').exists()
 
 def index(request):
     author = Author.objects.first()
-    return render(request, 'mailing/index.html', {'author': author})
+    blogs = list(Blog.objects.all())
+    if len(blogs) >= 3:
+        random_blogs = sample(blogs, 3)
+    else:
+        random_blogs = blogs
+    return render(request, 'mailing/index.html', {'author': author, 'blogs': random_blogs})
 
-@method_decorator(login_required, name='dispatch')
-class MailingCreateView(CreateView, UserPassesTestMixin):
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class MailingCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy('list_mailing')
@@ -32,8 +44,8 @@ class MailingCreateView(CreateView, UserPassesTestMixin):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
-@method_decorator(login_required, name='dispatch')
-class MailingUpdateView(UserPassesTestMixin, UpdateView):
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class MailingUpdateView(LoginRequiredMixin, UpdateView):
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy('list_mailing')
@@ -60,12 +72,19 @@ class MailingUpdateView(UserPassesTestMixin, UpdateView):
 class MailingListView(ListView):
     model = Mailing
 
+    def get_template_names(self):
+        if self.request.user.groups.filter(name='manager').exists():
+            template_name = 'for_manager/manager_mailing_list.html'
+        else:
+            template_name = 'mailing/mailing_list.html'
+        return [template_name]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 
-@method_decorator(login_required, name='dispatch')
-class MailingDeleteView(DeleteView):
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class MailingDeleteView(LoginRequiredMixin, DeleteView):
     model = Mailing
     success_url = reverse_lazy('list_mailing')
 
@@ -73,7 +92,6 @@ class MailingDeleteView(DeleteView):
 @method_decorator(login_required, name='dispatch')
 def start_mailing(request, pk):
     mailing = get_object_or_404(Mailing, pk=pk)
-
     if mailing.send_time > timezone.now():
         mailing.status = 'started'
         mailing.save()
@@ -84,12 +102,19 @@ def start_mailing(request, pk):
         while mailing.status != 'completed':
             for client in clients:
                 for message in messages:
-                    send_mail(
+                    response = send_mail(
                         subject=message.subject,
                         message=message.body,
                         from_email=settings.EMAIL_HOST_USER,
                         recipient_list=[client.email],
                     )
+                    log = MailingLog(
+                        mailing=mailing,
+                        timestamp=timezone.now(),
+                        status='завершено',
+                        server_response=response
+                    )
+                    log.save()
                     time.sleep(int(mailing.frequency) * 60)
 
             mailing.refresh_from_db()
@@ -103,15 +128,23 @@ def stop_mailing(request, pk):
         mailing.status = 'completed'
         mailing.save()
 
-    return redirect("list_mailing")
+        log = MailingLog(
+            mailing=mailing,
+            timestamp=timezone.now(),
+            status='завершено',
+            server_response=HttpResponse
+        )
+        log.save()
 
-class MessageCreateView(UserPassesTestMixin, CreateView):
+    return redirect("list_mailing")
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('list_message')
 
-
-class MessageUpdateView(UserPassesTestMixin, UpdateView):
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy('list_message')
@@ -134,28 +167,34 @@ class MessageUpdateView(UserPassesTestMixin, UpdateView):
         else:
             raise self.form_invalid(form)
 
-@method_decorator(login_required, name='dispatch')
-class MessageListView(ListView):
+
+class MessageListView(LoginRequiredMixin, ListView):
     model = Message
 
+    def get_template_names(self):
+        if self.request.user.groups.filter(name='manager').exists():
+            template_name = 'for_manager/manager_message_list.html'
+        else:
+            template_name = 'mailing/message_list.html'
+        return [template_name]
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
 
-@method_decorator(login_required, name='dispatch')
-class MessageDeleteView(DeleteView):
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     model = Message
     success_url = reverse_lazy('list_message')
 
-
-class ClientCreateView(UserPassesTestMixin, CreateView):
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class ClientCreateView(LoginRequiredMixin, CreateView):
     model = Client
     form_class = ClientForm
     success_url = reverse_lazy('list_client')
 
 
-
-class ClientUpdateView(UserPassesTestMixin, UpdateView):
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class ClientUpdateView(LoginRequiredMixin, UpdateView):
     model = Client
     form_class = ClientForm
     template_name = 'mailing/client_form.html'
@@ -179,12 +218,18 @@ class ClientUpdateView(UserPassesTestMixin, UpdateView):
         else:
             return self.form_invalid(form)
 
-@method_decorator(login_required, name='dispatch')
-class ClientListView(ListView):
+
+class ClientListView(LoginRequiredMixin, ListView):
     model = Client
     template_name = 'mailing/list_client.html'
+    def get_template_names(self):
+        if self.request.user.groups.filter(name='manager').exists():
+            template_name = 'for_manager/manager_client_list.html'
+        else:
+            template_name = 'mailing/client_list.html'
+        return [template_name]
 
-@method_decorator(login_required, name='dispatch')
-class ClientDeleteView(DeleteView):
+@method_decorator(user_passes_test(is_not_manager), name='dispatch')
+class ClientDeleteView(LoginRequiredMixin, DeleteView):
     model = Client
     success_url = reverse_lazy('list_client')

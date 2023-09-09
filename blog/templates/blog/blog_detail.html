@@ -1,0 +1,30 @@
+{% extends 'mailing/base.html' %}
+{% load my_tags %}
+{% block content %}
+
+ <div class="row mb-2">
+    <div class="col-md-12">
+      <div class="row g-0">
+        <div class="col p-4">
+          <strong class="d-inline-block mb-2 text-primary-emphasis">{{ object.title }}</strong>
+          <h3 class="mb-0"> Views: {{ object.view_count }}</h3>
+          <div class="mb-1 text-body-secondary">{{ object.created_date }}</div>
+        </div>
+        <div class="col-auto d-none d-lg-block">
+          <img src="{{ object.preview|mediapath }}" />
+        </div>
+          <div>
+              <p class="card-text">{{ object.content }}</p>
+          <div class="dtn-group">
+            <a href="{%url 'blog:edit_blog' object.pk %}" type="button"
+            class="btn btn-sm btn-outline-secondary">Edit</a>
+              <a href="{%url 'blog:delete_blog' object.pk %}" type="button"
+            class="btn btn-sm btn-outline-secondary">Delete</a>
+          </div>
+    </div>
+      </div>
+    </div>
+ </div>
+
+
+{% endblock %}

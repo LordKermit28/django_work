@@ -64,7 +64,7 @@ class VerifyEmailView(TemplateView):
 class ProfileView(LoginRequiredMixin, UpdateView):
     model = Author
     form_class = AuthorProfileForm
-    success_url = reverse_lazy('clients:profile')
+    success_url = reverse_lazy('index')
 
     def get_object(self, queryset=None):
         return self.request.user
