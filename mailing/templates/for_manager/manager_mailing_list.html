@@ -17,6 +17,11 @@
             <p>Send time - {{ object.send_time }}</p>
             <p>Frequency - {{ object.frequency }}</p>
             <p>Status - {{ object.status }}</p>
-
+                {% if object.status == 'started' %}
+                <p>Рассылка выполняется...</p>
+                <a href="{% url 'stop_mailing' object.pk %}" class="btn btn-info">
+                    Завершить
+                </a>
+                {% endif %}
 {% endfor %}
 {% endblock %}

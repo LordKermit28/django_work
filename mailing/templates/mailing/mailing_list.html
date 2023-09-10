@@ -21,8 +21,6 @@
             <p>Send time - {{ object.send_time }}</p>
             <p>Frequency - {{ object.frequency }}</p>
             <p>Status - {{ object.status }}</p>
-
-            {% if user.grop == manager %}
                 {% if object.status == 'created' %}
                 <a href="{% url 'start_mailing' object.pk %}" class="btn btn-info">
                     Запустить
@@ -37,14 +35,6 @@
                 <a href="{% url 'start_mailing' object.pk %}" class="btn btn-info">
                     Запустить снова
                 </a>
-                <script>
-            function refreshPage() {
-                location.replace(location.href); =
-            }
-
-
-
-                </script>
                 {% endif %}
                 <a href="{% url 'edit_mailing' object.pk %}" class="btn btn-warning">
                     Редактировать
@@ -52,7 +42,6 @@
                 <a href="{% url 'delete_mailing' object.pk %}" class="btn btn-danger">
                     Удалить
                 </a>
-            {% endif %}
         </div>
     </div>
 </div>

@@ -42,7 +42,6 @@ class MailingLog(models.Model):
     status = models.CharField(max_length=200)
     server_response = models.TextField(null=True, blank=True)
 
-    def __str__(self):
-        return self.mailing, self.timestamp, self.status, self.server_response
+
 
 

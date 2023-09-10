@@ -11,6 +11,9 @@
                 <p class="lead">
                     <a href="{% url 'list_mailing' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К
                         рассылкам</a>
+                <p class="text-white">Количество рассылок: {{ total_mailings }}</p>
+                </p>
+                <p class="text-white">Количество активных рассылок: {{ active_mailings }}</p>
                 </p>
                 <p class="lead">
                     <a href="{% url 'list_message' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К
@@ -19,6 +22,7 @@
                 <p class="lead">
                     <a href="{% url 'list_client' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">К
                         клиентам</a>
+                <p class="text-white">Количество клиентов: {{ unique_clients }}</p>
                 </p>
                 <p class="lead">
                     <a href="{% url 'clients:profile' %}"
@@ -43,24 +47,24 @@
         </div>
     </div>
 </div>
-    {% else %}
-    <div class="row mt-4">
-      <div class="col-md-12">
+{% else %}
+<div class="row mt-4">
+    <div class="col-md-12">
         <p class="lead">Войдите в аккаунт или зарегистрируйтесь</p>
         <p class="lead">
-          <a href="{% url 'clients:login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Войти</a>
+            <a href="{% url 'clients:login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Войти</a>
         </p>
         <a href="{% url 'clients:register' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Зарегистрироваться</a>
-      </div>
     </div>
-    {% endif %}
-    </div>
+</div>
+{% endif %}
+</div>
 {% if user.is_authenticated %}
-    <footer class="mt-auto text-white-50">
-      <p><a href="{% url 'clients:logout' %}" class="text-white">Выйти</a>.</p>
-    </footer>
-    </div>
-    {% endif %}
-  </div>
+<footer class="mt-auto text-white-50">
+    <p><a href="{% url 'clients:logout' %}" class="text-white">Выйти</a>.</p>
+</footer>
+</div>
+{% endif %}
+</div>
 </div>
 {% endblock %}

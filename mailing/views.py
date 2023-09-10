@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
+from django.views.decorators.cache import cache_page
 from django.views.generic import CreateView, UpdateView, ListView, DetailView, DeleteView
 from blog.models import Blog
 from clients.models import Author
@@ -19,9 +20,13 @@ from django.utils import timezone
 from django.conf import settings
 import time
 
+from mailing.services import logging_func
+
+
 def is_not_manager(user):
     return not user.groups.filter(name='manager').exists()
 
+@cache_page(60)
 def index(request):
     author = Author.objects.first()
     blogs = list(Blog.objects.all())
@@ -29,7 +34,20 @@ def index(request):
         random_blogs = sample(blogs, 3)
     else:
         random_blogs = blogs
-    return render(request, 'mailing/index.html', {'author': author, 'blogs': random_blogs})
+
+    total_mailings = Mailing.objects.count()
+
+    active_mailings = Mailing.objects.filter(status='started').count()
+
+    unique_clients = Client.objects.values('email').distinct().count()
+
+    return render(request, 'mailing/index.html', {
+        'author': author,
+        'blogs': random_blogs,
+        'total_mailings': total_mailings,
+        'active_mailings': active_mailings,
+        'unique_clients': unique_clients,
+    })
 
 @method_decorator(user_passes_test(is_not_manager), name='dispatch')
 class MailingCreateView(LoginRequiredMixin, CreateView):
@@ -90,15 +108,17 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('list_mailing')
 
 
-@method_decorator(login_required, name='dispatch')
+
 def start_mailing(request, pk):
 
     mailing = get_object_or_404(Mailing, pk=pk)
+
     if mailing.send_time > timezone.now():
+
         mailing.status = 'started'
         mailing.save()
 
-        clients = Client.objects.all()
+        clients = Client.objects.filter(mailing=mailing)
         messages = Message.objects.filter(mailing=mailing)
 
         while mailing.status != 'completed':
@@ -110,35 +130,25 @@ def start_mailing(request, pk):
                         from_email=settings.EMAIL_HOST_USER,
                         recipient_list=[client.email],
                     )
-                    log = MailingLog(
-                        mailing=mailing,
-                        timestamp=timezone.now(),
-                        status='завершено',
-                        server_response=response
-                    )
-                    log.save()
+                    logging_func(mailing=mailing, status='send_email', HttpResponse=response)
                     time.sleep(int(mailing.frequency) * 60)
 
             mailing.refresh_from_db()
 
         return HttpResponseRedirect(reverse('list_mailing'))
+    else:
+        return HttpResponseRedirect(reverse('list_mailing'))
 
-@method_decorator(login_required, name='dispatch')
+
 def stop_mailing(request, pk):
     mailing = get_object_or_404(Mailing, pk=pk)
     if mailing.status == 'started':
         mailing.status = 'completed'
         mailing.save()
-
-        log = MailingLog(
-            mailing=mailing,
-            timestamp=timezone.now(),
-            status='завершено',
-            server_response=HttpResponse
-        )
-        log.save()
+        logging_func(mailing=mailing, status='mailing is finished', HttpResponse=HttpResponse)
 
     return redirect("list_mailing")
+
 @method_decorator(user_passes_test(is_not_manager), name='dispatch')
 class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message

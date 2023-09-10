@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.template.defaultfilters import slugify
 from django.urls import reverse_lazy, reverse
+from django.views.decorators.cache import cache_page
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, DeleteView
 from blog.forms import BlogForm
 from blog.models import Blog
@@ -25,9 +26,10 @@ class BlogCreateView(LoginRequiredMixin, CreateView):
         else:
             return self.form_valid(form)
 
-
 class BlogListView(ListView):
     model = Blog
+    template_name = 'blog/blog_list.html'
+    context_object_name = 'blogs'
 
 class BlogUpdateView(LoginRequiredMixin, UpdateView):
     model = Blog
