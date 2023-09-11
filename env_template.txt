@@ -1,0 +1,7 @@
+DATA_BASE_PASSWORD=YourDATA_BASE_PASSWORD
+
+EMAIL=your_yandex_email
+PASSWORD=your_email_app_password
+
+CACHE_LOCAL=redis://127.0.0.1:6379
+CACHE_ENABLE=True
