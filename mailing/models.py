@@ -35,7 +35,6 @@ class Mailing(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
 
-
 class MailingLog(models.Model):
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now=True)

@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page, never_cache
 from django.views.generic import CreateView, UpdateView, ListView, DetailView, DeleteView
 from blog.models import Blog
 from clients.models import Author
@@ -26,24 +26,28 @@ from mailing.services import logging_func
 def is_not_manager(user):
     return not user.groups.filter(name='manager').exists()
 
+
 @cache_page(60)
 def index(request):
     author = Author.objects.first()
-    blogs = list(Blog.objects.all())
-    if len(blogs) >= 3:
-        random_blogs = sample(blogs, 3)
+    blogs = Blog.objects.all()
+
+    if blogs.count() >= 3:
+        random_blogs = sample(list(blogs), 3)
     else:
-        random_blogs = blogs
+        random_blogs = list(blogs)
 
     total_mailings = Mailing.objects.count()
+    active_mailings = 0
+    unique_clients = 0
 
-    active_mailings = Mailing.objects.filter(status='started').count()
-
-    unique_clients = Client.objects.values('email').distinct().count()
+    if request.user.is_authenticated:
+        active_mailings = Mailing.objects.filter(status='started', author=request.user).count()
+        unique_clients = Client.objects.values('email').distinct().count()
 
     return render(request, 'mailing/index.html', {
         'author': author,
-        'blogs': random_blogs,
+        'random_blogs': random_blogs,
         'total_mailings': total_mailings,
         'active_mailings': active_mailings,
         'unique_clients': unique_clients,
@@ -110,34 +114,13 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
 
 
 def start_mailing(request, pk):
-
     mailing = get_object_or_404(Mailing, pk=pk)
-
-    if mailing.send_time > timezone.now():
+    if mailing.send_time >= timezone.now() and mailing.status != 'started':
 
         mailing.status = 'started'
         mailing.save()
 
-        clients = Client.objects.filter(mailing=mailing)
-        messages = Message.objects.filter(mailing=mailing)
-
-        while mailing.status != 'completed':
-            for client in clients:
-                for message in messages:
-                    response = send_mail(
-                        subject=message.subject,
-                        message=message.body,
-                        from_email=settings.EMAIL_HOST_USER,
-                        recipient_list=[client.email],
-                    )
-                    logging_func(mailing=mailing, status='send_email', HttpResponse=response)
-                    time.sleep(int(mailing.frequency) * 60)
-
-            mailing.refresh_from_db()
-
-        return HttpResponseRedirect(reverse('list_mailing'))
-    else:
-        return HttpResponseRedirect(reverse('list_mailing'))
+    return HttpResponseRedirect(reverse('list_mailing'))
 
 
 def stop_mailing(request, pk):
@@ -145,7 +128,7 @@ def stop_mailing(request, pk):
     if mailing.status == 'started':
         mailing.status = 'completed'
         mailing.save()
-        logging_func(mailing=mailing, status='mailing is finished', HttpResponse=HttpResponse)
+        logging_func(mailing=mailing, status='mailing is finished', response=HttpResponse())
 
     return redirect("list_mailing")
 

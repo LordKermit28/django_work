@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'clients',
     'tempus_dominus',
     'blog',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -126,3 +127,7 @@ CACHES = {
         "LOCATION": os.getenv('CACHE_LOCAL'),
     }
 }
+
+CRON_CLASSES = [
+    'mailing.cron.MailingCronJob',
+]
