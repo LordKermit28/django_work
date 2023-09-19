@@ -34,6 +34,10 @@ class Mailing(models.Model):
     messages = models.ManyToManyField(Message)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f'{self.name}, {self.status}, {self.send_time}'
+    class Meta:
+        verbose_name_plural = 'Mailings'
 
 class MailingLog(models.Model):
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE)

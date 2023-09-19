@@ -1,6 +1,8 @@
+import datetime
+
 from django.utils import timezone
 from django_cron import CronJobBase, Schedule
-
+from dateutil import parser
 from mailing.models import Mailing
 from mailing.services import send_mailing
 
@@ -11,8 +13,8 @@ class MailingCronJob(CronJobBase):
     code = 'mailing.mailing_cron_job'
 
     def do(self):
-        current_time = timezone.now()
 
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
         daily_mailings = Mailing.objects.filter(send_time__lte=current_time, frequency='1', status='started')
         weekly_mailings = Mailing.objects.filter(send_time__lte=current_time, frequency='7', status='started')
         monthly_mailings = Mailing.objects.filter(send_time__lte=current_time, frequency='30', status='started')
